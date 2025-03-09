@@ -9,6 +9,7 @@
         .coin { width: 100px; height: 100px; cursor: pointer; }
         #counter { font-size: 24px; margin-top: 10px; }
     </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script> <!-- Подключаем Telegram WebApp API -->
 </head>
 <body>
     <h1>Кликер</h1>
@@ -35,11 +36,16 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Проверяем, есть ли userId в localStorage
-        let userId = localStorage.getItem("userId");
-        if (!userId) {
-            userId = "user_" + Math.random().toString(36).substr(2, 9); // Генерируем новый ID
-            localStorage.setItem("userId", userId); // Сохраняем в localStorage
+        // Получаем данные Telegram Mini App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем на весь экран
+
+        // Проверяем, есть ли пользователь
+        let userId;
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            userId = "tg_" + tg.initDataUnsafe.user.id; // Telegram ID пользователя
+        } else {
+            userId = "guest_" + Math.random().toString(36).substr(2, 9); // Гостевой режим
         }
 
         let clicks = 0;
