@@ -34,11 +34,17 @@
         // Инициализация Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const userId = "user_" + Math.random().toString(36).substr(2, 9); // Уникальный ID для каждого пользователя
+
+        // Проверяем, есть ли userId в localStorage
+        let userId = localStorage.getItem("userId");
+        if (!userId) {
+            userId = "user_" + Math.random().toString(36).substr(2, 9); // Генерируем новый ID
+            localStorage.setItem("userId", userId); // Сохраняем в localStorage
+        }
 
         let clicks = 0;
 
-        // Читаем сохраненные клики
+        // Читаем сохраненные клики из Firebase
         get(ref(db, "users/" + userId + "/clicks")).then(snapshot => {
             if (snapshot.exists()) {
                 clicks = snapshot.val();
