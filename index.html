@@ -3,25 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кликер</title>
+    <title>Кликер | Solo Leveling</title>
     <style>
-        body { text-align: center; font-family: Arial, sans-serif; }
-        .coin { width: 300px; height: 300px; cursor: pointer; }
-        #counter { font-size: 24px; margin-top: 10px; }
+        body {
+            background: #0c0c0c;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            font-size: 36px;
+            margin-top: 20px;
+            text-shadow: 0 0 10px #0077ff;
+        }
+        .coin {
+            width: 250px;
+            height: 250px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            filter: drop-shadow(0 0 15px #0077ff);
+        }
+        .coin:hover {
+            transform: scale(1.1);
+        }
+        #counter {
+            font-size: 28px;
+            margin-top: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff0077;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script> <!-- Подключаем Telegram WebApp API -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <h1 height="100px" width="100px">Кликер</h1>
-    <img src="https://yt3.ggpht.com/ytc/AKedOLRH7gFBUR6kpfIHDf_eQI3EZ_wcavpkeaqmt3cCbQ=s900-c-k-c0x00ffffff-no-rj" class="coin" id="coin">
-    <p id="counter">Загрузка...</p>
-
+    <div class="container">
+        <h1>Кликер: Путь Охотника</h1>
+        <img src="https://yt3.ggpht.com/ytc/AKedOLRH7gFBUR6kpfIHDf_eQI3EZ_wcavpkeaqmt3cCbQ=s900-c-k-c0x00ffffff-no-rj" class="coin" id="coin">
+        <p id="counter">Загрузка...</p>
+    </div>
+    
     <script type="module">
-        // Подключение Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
         import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
-        // Firebase конфиг
         const firebaseConfig = {
             apiKey: "AIzaSyDO8Oa5kif8ANsLEMuamqDlvO5hTFFo5_c",
             authDomain: "clicker-72daf.firebaseapp.com",
@@ -32,25 +65,20 @@
             measurementId: "G-21WJ4X567N"
         };
 
-        // Инициализация Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Получаем данные Telegram Mini App
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем на весь экран
+        tg.expand();
 
-        // Проверяем, есть ли пользователь
         let userId;
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            userId = "tg_" + tg.initDataUnsafe.user.id; // Telegram ID пользователя
+            userId = "tg_" + tg.initDataUnsafe.user.id;
         } else {
-            userId = "guest_" + Math.random().toString(36).substr(2, 9); // Гостевой режим
+            userId = "guest_" + Math.random().toString(36).substr(2, 9);
         }
 
         let clicks = 0;
-
-        // Читаем сохраненные клики из Firebase
         get(ref(db, "users/" + userId + "/clicks")).then(snapshot => {
             if (snapshot.exists()) {
                 clicks = snapshot.val();
@@ -58,11 +86,10 @@
             document.getElementById("counter").innerText = "Кликов: " + clicks;
         });
 
-        // Обработка кликов
         document.getElementById("coin").addEventListener("click", () => {
             clicks++;
             document.getElementById("counter").innerText = "Кликов: " + clicks;
-            set(ref(db, "users/" + userId), { clicks }); // Сохраняем в Firebase
+            set(ref(db, "users/" + userId), { clicks });
         });
     </script>
 </body>
