@@ -113,6 +113,7 @@
             update(ref(db, "users/" + userId), { clicks });
         });
 
+        // Проверка, есть ли реферальный ID в ссылке
         const urlParams = new URLSearchParams(window.location.search);
         const referrerId = urlParams.get("ref");
 
@@ -120,12 +121,13 @@
             get(ref(db, "users/" + referrerId)).then(snapshot => {
                 if (snapshot.exists()) {
                     let refPoints = snapshot.val().referralPoints || 0;
-                    refPoints += 100;
+                    refPoints += 100; // Начисляем 100 поинтов за реферала
                     update(ref(db, "users/" + referrerId), { referralPoints: refPoints });
                 }
             });
         }
 
+        // Формируем реферальную ссылку
         const refLink = `${window.location.origin}${window.location.pathname}?ref=${userId}`;
         document.getElementById("ref-link").href = refLink;
         document.getElementById("ref-link").innerText = "Ваша реферальная ссылка: " + refLink;
