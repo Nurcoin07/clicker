@@ -70,7 +70,7 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+        import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDO8Oa5kif8ANsLEMuamqDlvO5hTFFo5_c",
@@ -118,11 +118,14 @@
         const referrerId = urlParams.get("ref");
 
         if (referrerId && referrerId !== userId) {
-            get(ref(db, "users/" + referrerId)).then(snapshot => {
+            get(ref(db, "users/" + referrerId + "/referrals")).then(snapshot => {
+                let referrals = [];
                 if (snapshot.exists()) {
-                    let refPoints = snapshot.val().referralPoints || 0;
-                    refPoints += 100; // Начисляем 100 поинтов за реферала
-                    update(ref(db, "users/" + referrerId), { referralPoints: refPoints });
+                    referrals = snapshot.val();
+                }
+                if (!referrals.includes(userId)) {
+                    referrals.push(userId);
+                    update(ref(db, "users/" + referrerId), { referrals });
                 }
             });
         }
