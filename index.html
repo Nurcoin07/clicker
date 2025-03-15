@@ -7,42 +7,69 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/sdk"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background: #222; color: white; }
-        button { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; background: #0088cc; color: white; }
-        button:hover { background: #005f99; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #1a1a1a;
+            color: white;
+        }
+        .container {
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            background: #0088cc;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #005f99;
+        }
+        .team {
+            margin-top: 20px;
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
-    <h1>TON Matrix</h1>
-    <p><strong>Ваш Telegram ID:</strong> <span id="userId">Загрузка...</span></p>
-    <button id="connectWallet">🔗 Подключить TON-кошелек</button>
+    <div class="container">
+        <h1>TON Matrix</h1>
+        <p><strong>Ваш Telegram ID:</strong> <span id="userId">Загрузка...</span></p>
+        <button id="connectWallet">🔗 Подключить TON-кошелек</button>
 
-    <h2>Реферальная система</h2>
-    <button id="register">✅ Зарегистрироваться</button>
-    <p><strong>Ваши рефералы:</strong> <span id="referrals">0</span></p>
+        <h2>Реферальная система</h2>
+        <button id="register">✅ Зарегистрироваться</button>
+        <p><strong>Ваши рефералы:</strong> <span id="referrals">0</span></p>
 
-    <h2>Купить статус</h2>
-    <button onclick="buyStatus(1)">💎 Купить за 3 TON</button>
-    <button onclick="buyStatus(2)">🔥 Купить за 10 TON</button>
-    <button onclick="buyStatus(3)">🚀 Купить за 20 TON</button>
+        <h2>Купить статус</h2>
+        <button onclick="buyStatus(1)">💎 Купить за 3 TON</button>
+        <button onclick="buyStatus(2)">🔥 Купить за 10 TON</button>
+        <button onclick="buyStatus(3)">🚀 Купить за 20 TON</button>
 
-    <h2>Моя команда</h2>
-    <div id="team"></div>
+        <h2>Моя команда</h2>
+        <div id="team" class="team">Загрузка...</div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть Mini App на весь экран
+        tg.expand();
 
         const tonConnect = new TONConnect();
-        const contractAddress = "YOUR_CONTRACT_ADDRESS"; // Укажите свой контракт
+        const contractAddress = "YOUR_CONTRACT_ADDRESS"; // Укажи свой смарт-контракт
+        const adminWallet = "UQCB1eRpWSKN839on6Uns7mCSLoDTEbSZlkw9bDipC83OLFT"; // Кошелек для 10%
 
-        let userId = "Гость"; // Если нет Telegram ID
+        let userId = "Гость";
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             userId = "tg_" + tg.initDataUnsafe.user.id;
         }
         document.getElementById("userId").textContent = userId;
 
-        // Функция подключения кошелька TON
         async function connectWallet() {
             try {
                 await tonConnect.connect();
@@ -52,7 +79,6 @@
             }
         }
 
-        // Регистрация с учетом реферальной системы
         async function register() {
             let inviterId = new URLSearchParams(window.location.search).get("ref") || "0";
 
@@ -68,17 +94,32 @@
             }
         }
 
-        // Функция покупки статуса
         async function buyStatus(level) {
             let price = level === 1 ? 3 : level === 2 ? 10 : 20;
 
             try {
+                let balance = await tonConnect.getBalance();
+                if (balance < price) {
+                    alert("❌ Недостаточно TON! Пополните баланс.");
+                    return;
+                }
+
                 let tx = await tonConnect.invokeTonApi({
                     address: contractAddress,
                     method: "buyStatus",
                     params: [level],
-                    value: price.toString(), // Сумма в TON
+                    value: price.toString(),
                 });
+
+                // Отправляем 10% админу
+                let adminFee = price * 0.1;
+                await tonConnect.invokeTonApi({
+                    address: adminWallet,
+                    method: "transfer",
+                    params: [],
+                    value: adminFee.toString(),
+                });
+
                 alert("🎉 Статус куплен! TX: " + tx);
             } catch (err) {
                 alert("❌ Ошибка покупки: " + err.message);
