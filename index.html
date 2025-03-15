@@ -1,139 +1,59 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кликер | Solo Leveling</title>
-    <style>
-        body {
-            background: #0c0c0c;
-            color: #ffffff;
-            font-family: 'Arial', sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-        h1 {
-            font-size: 36px;
-            margin-top: 20px;
-            text-shadow: 0 0 10px #0077ff;
-        }
-        .coin {
-            width: 250px;
-            height: 250px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            filter: drop-shadow(0 0 15px #0077ff);
-        }
-        .coin:hover {
-            transform: scale(1.1);
-        }
-        #counter, #ref-counter {
-            font-size: 28px;
-            margin-top: 20px;
-            font-weight: bold;
-            text-shadow: 0 0 5px #ff0077;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        .link {
-            font-size: 18px;
-            color: #00ffcc;
-            text-decoration: none;
-            margin-top: 20px;
-            display: inline-block;
-            padding: 10px;
-            border: 2px solid #00ffcc;
-            border-radius: 5px;
-            transition: background 0.3s ease;
-        }
-        .link:hover {
-            background: #00ffcc;
-            color: #0c0c0c;
-        }
-    </style>
+    <title>TON Matrix</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/sdk"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #222; color: white; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Кликер: Путь Охотника</h1>
-        <img src="https://yt3.ggpht.com/ytc/AKedOLRH7gFBUR6kpfIHDf_eQI3EZ_wcavpkeaqmt3cCbQ=s900-c-k-c0x00ffffff-no-rj" class="coin" id="coin">
-        <p id="counter">Загрузка...</p>
-        <p id="ref-counter">Реферальные поинты: 0</p>
-        <a href="#" class="link" id="ref-link">Получить реферальную ссылку</a>
-    </div>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getDatabase, ref, get, set, update, push } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-database.js";
+    <h1>TON Matrix</h1>
+    <p><strong>Ваш Telegram ID:</strong> <span id="userId">Не подключен</span></p>
+    <button id="connectWallet">Подключить TON-кошелек</button>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDO8Oa5kif8ANsLEMuamqDlvO5hTFFo5_c",
-            authDomain: "clicker-72daf.firebaseapp.com",
-            projectId: "clicker-72daf",
-            storageBucket: "clicker-72daf.appspot.com",
-            messagingSenderId: "129180975746",
-            appId: "1:129180975746:web:87602a9eea0f9b29782a9b",
-            measurementId: "G-21WJ4X567N"
-        };
+    <h2>Реферальная система</h2>
+    <button id="register">Зарегистрироваться</button>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    <h2>Купить статус</h2>
+    <button onclick="buyStatus(1)">Купить за 3 TON</button>
+    <button onclick="buyStatus(2)">Купить за 10 TON</button>
+    <button onclick="buyStatus(3)">Купить за 20 TON</button>
 
+    <h2>Моя команда</h2>
+    <div id="team"></div>
+
+    <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
+        const tonConnect = new TONConnect();
+        const contractAddress = "YOUR_CONTRACT_ADDRESS"; // Замените на свой адрес
 
-        let userId;
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            userId = "tg_" + tg.initDataUnsafe.user.id;
-        } else {
-            userId = "guest_" + Math.random().toString(36).substr(2, 9);
+        tg.expand(); // Разворачивает Mini App на весь экран
+        document.getElementById("userId").textContent = tg.initDataUnsafe.user.id;
+
+        async function connectWallet() {
+            await tonConnect.connect();
+            alert("Кошелек подключен!");
         }
 
-        let clicks = 0;
-        let referralPoints = 0;
-
-        get(ref(db, "users/" + userId)).then(snapshot => {
-            if (snapshot.exists()) {
-                clicks = snapshot.val().clicks || 0;
-                referralPoints = snapshot.val().referralPoints || 0;
-            }
-            document.getElementById("counter").innerText = "Кликов: " + clicks;
-            document.getElementById("ref-counter").innerText = "Реферальные поинты: " + referralPoints;
-        });
-
-        document.getElementById("coin").addEventListener("click", () => {
-            clicks++;
-            document.getElementById("counter").innerText = "Кликов: " + clicks;
-            update(ref(db, "users/" + userId), { clicks });
-        });
-
-        // Проверка, есть ли реферальный ID в ссылке
-        const urlParams = new URLSearchParams(window.location.search);
-        const referrerId = urlParams.get("ref");
-
-        if (referrerId && referrerId !== userId) {
-            get(ref(db, "users/" + referrerId + "/referrals")).then(snapshot => {
-                let referrals = [];
-                if (snapshot.exists()) {
-                    referrals = snapshot.val();
-                }
-                if (!referrals.includes(userId)) {
-                    referrals.push(userId);
-                    update(ref(db, "users/" + referrerId), { referrals });
-                }
-            });
+        async function register() {
+            let inviter = new URLSearchParams(window.location.search).get("ref") || "0";
+            let tx = await tonConnect.sendTransaction(contractAddress, "register", [inviter]);
+            alert("Вы зарегистрированы! TX: " + tx);
         }
 
-        // Формируем реферальную ссылку
-        const refLink = `${window.location.origin}${window.location.pathname}?ref=${userId}`;
-        document.getElementById("ref-link").href = refLink;
-        document.getElementById("ref-link").innerText = "Ваша реферальная ссылка: " + refLink;
+        async function buyStatus(level) {
+            let price = level === 1 ? 3 : level === 2 ? 10 : 20;
+            let tx = await tonConnect.sendTransaction(contractAddress, "buyStatus", [level], price);
+            alert("Статус куплен! TX: " + tx);
+        }
+
+        document.getElementById("connectWallet").addEventListener("click", connectWallet);
+        document.getElementById("register").addEventListener("click", register);
     </script>
 </body>
 </html>
