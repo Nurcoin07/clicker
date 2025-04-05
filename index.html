@@ -71,29 +71,41 @@
     </script>
 </body>
 </html>-->
-<!DOCTYPE html>
+
+  <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Обрезанный iframe</title>
+  <title>Игра GD.Games в iframe</title>
   <style>
-    .iframe-container {
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .iframe-container iframe {
+    .iframe-wrapper {
       width: 100%;
-      height: calc(100% + 80px); /* увеличим высоту */
+      max-width: 1000px;
+      height: 500px;
+      box-shadow: 0 0 20px #000;
+      overflow: hidden;
+      border: 3px solid #333;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
       border: none;
-      transform: translateY(-80px); /* поднимаем содержимое вверх */
     }
   </style>
 </head>
 <body>
-  <div class="iframe-container">
+  <div class="iframe-wrapper">
     <iframe src="https://gd.games/games/89f5549d-3271-4e2e-a64b-8fec3e24735b" allowfullscreen></iframe>
   </div>
 </body>
