@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -69,5 +69,32 @@
         document.getElementById("connectWallet").addEventListener("click", connectWallet);
         document.getElementById("register").addEventListener("click", register);
     </script>
+</body>
+</html>-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Обрезанный iframe</title>
+  <style>
+    .iframe-container {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .iframe-container iframe {
+      width: 100%;
+      height: calc(100% + 80px); /* увеличим высоту */
+      border: none;
+      transform: translateY(-80px); /* поднимаем содержимое вверх */
+    }
+  </style>
+</head>
+<body>
+  <div class="iframe-container">
+    <iframe src="https://gd.games/games/ea117500-9cb0-4bdc-b1af-62cd258fbaf7" allowfullscreen></iframe>
+  </div>
 </body>
 </html>
